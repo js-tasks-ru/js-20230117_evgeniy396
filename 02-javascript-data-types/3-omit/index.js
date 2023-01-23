@@ -6,7 +6,7 @@
  */
 export const omit = (obj, ...fields) => {
   const newObj = {}
-  Object.entries(obj).filter(item => {
+  Object.entries(obj).forEach(item => {
     if (!fields.includes(item[0])) {
       newObj[item[0]] = item[1]
     }
