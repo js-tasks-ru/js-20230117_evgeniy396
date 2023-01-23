@@ -5,10 +5,10 @@
  * @returns {object} - returns the new object
  */
 export const omit = (obj, ...fields) => {
-  const newObj = Object.assign({}, obj)
-  Object.entries(obj).map(([key, value]) => {
-    if (fields.includes(key)) {
-      delete newObj[key]
+  const newObj = {}
+  Object.entries(obj).filter(item => {
+    if (!fields.includes(item[0])) {
+      newObj[item[0]] = item[1]
     }
   })
   return newObj

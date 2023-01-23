@@ -6,9 +6,9 @@
  */
 export const pick = (obj, ...fields) => {
   const newObj = {}
-  Object.entries(obj).map(([key, value]) => {
-    if (fields.includes(key)) {
-      newObj[key] = value
+  Object.entries(obj).forEach(item => {
+    if (fields.includes(item[0])) {
+      newObj[item[0]] = item[1]
     }
   })
   return newObj
