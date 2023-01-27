@@ -8,7 +8,6 @@ export function invertObj(obj) {
     let result = {}
     Object.entries(obj).forEach(([key, value]) => result[value] = key)
     return result
-  } else {
-    return obj
   }
+  return obj
 }
