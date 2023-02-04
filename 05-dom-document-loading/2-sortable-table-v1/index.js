@@ -77,14 +77,14 @@ export default class SortableTable {
   sort (field, order) {
     const sortedArray = this.getSortedArray(field, order)
     const allColumns = this.element.querySelectorAll('.sortable-table__cell[data-id]')
-      const currentColumn = this.element.querySelector(`.sortable-table__cell[data-id="${field}"]`)
+    const currentColumn = this.element.querySelector(`.sortable-table__cell[data-id="${field}"]`)
 
-      allColumns.forEach(column => {
-        column.dataset.order = ''
-      })
+    allColumns.forEach(column => {
+      column.dataset.order = ''
+    })
 
-      currentColumn.dataset.order = order
-      this.subElements.body.innerHTML = this.renderBody(sortedArray)
+    currentColumn.dataset.order = order
+    this.subElements.body.innerHTML = this.renderBody(sortedArray)
   }
 
   getSubElements(element) {
@@ -112,4 +112,3 @@ export default class SortableTable {
     this.subElements = {};
   }
 }
-
