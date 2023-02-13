@@ -1,10 +1,11 @@
+const BASIC_URL = 'https://course-js.javascript.ru'
+
 export default class ColumnChart {
   chartHeight = 50
   element = null
   subElements = {}
   value = 0
   data = []
-  BASIC_URL = 'https://course-js.javascript.ru'
   constructor({
     url = '',
     range = {
@@ -61,19 +62,23 @@ export default class ColumnChart {
 
   async update (from, to) {
     try {
-      const response = await fetch(`${this.BASIC_URL}/${this.url}?from=${from}&to=${to}`)
+      const response = await fetch(`${BASIC_URL}/${this.url}?from=${from}&to=${to}`)
       const data = await response.json()
-      this.data = Object.values(data)
-      this.value = this.data.reduce((a, b) => b + a)
-      if (this.data.length !== 0) {
-        this.element.classList.remove('column-chart_loading')
-      }
-      this.subElements.header.innerHTML = this.formatHeading(this.value)
-      this.subElements.body.innerHTML = this.getChartList(this.data)
+      this.updateData(data)
       return data
     } catch(err) {
       console.error(err)
     }
+  }
+
+  updateData (data) {
+    this.data = Object.values(data)
+    this.value = this.data.reduce((a, b) => b + a)
+    if (this.data.length !== 0) {
+      this.element.classList.remove('column-chart_loading')
+    }
+    this.subElements.header.innerHTML = this.formatHeading(this.value)
+    this.subElements.body.innerHTML = this.getChartList(this.data)
   }
 
   getSubElements() {

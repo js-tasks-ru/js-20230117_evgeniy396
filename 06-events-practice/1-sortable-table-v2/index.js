@@ -108,27 +108,27 @@ export default class SortableTable {
 
 
   getSubElements(element) {
-    const result = {};
-    const elements = element.querySelectorAll('[data-element]');
+    const result = {}
+    const elements = element.querySelectorAll('[data-element]')
 
     for (const subElement of elements) {
-      const name = subElement.dataset.element;
+      const name = subElement.dataset.element
 
-      result[name] = subElement;
+      result[name] = subElement
     }
 
-    return result;
+    return result
   }
 
   remove () {
     if (this.element) {
-      this.element.remove();
+      this.element.remove()
     }
   }
 
   destroy() {
     this.remove();
     this.element = null;
-    this.subElements = {};
+    this.subElements = {}
   }
 }
