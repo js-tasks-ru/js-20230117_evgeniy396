@@ -56,17 +56,11 @@ export default class SortableTable {
   }
 
   async getData (url) {
-    try {
-      const response = await fetch(url)
-      const data = await response.json()
-      this.data = this.data.concat(data)
-      this.update(this.data)
-      return data
-    } catch (err) {
-      console.error(err)
-    } finally {
-      this.noRepeat = false
-    }
+    const response = await fetch(url.toString())
+    const data = await response.json()
+    this.data = this.data.concat(data)
+    this.update(this.data)
+    return this.data
   }
 
   update (data) {
