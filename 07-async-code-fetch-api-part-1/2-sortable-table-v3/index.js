@@ -41,8 +41,13 @@ export default class SortableTable {
     const endOfPage = window.innerHeight + window.pageYOffset >= document.body.offsetHeight
     if (endOfPage && !this.noRepeat) {
       this.noRepeat = true
+      this.start = this.data.length
+      this.end = this.start + this.STEP
       this.loadData(this.sorted.id, this.sorted.order)
-      console.log(this.start, this.end)
+    }
+
+    if (!endOfPage) {
+      this.noRepeat = false
     }
   }
 
