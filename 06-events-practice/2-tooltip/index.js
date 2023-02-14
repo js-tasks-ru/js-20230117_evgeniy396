@@ -2,12 +2,12 @@ class Tooltip {
   body = document.body
   element = null
   IDENT = 10
-  static onlyInstance = null;
-  constructor(){
-    if(!Tooltip.onlyInstance){
-      Tooltip.onlyInstance = this;
+  static onlyInstance = null
+  constructor () {
+    if (!Tooltip.onlyInstance) {
+      Tooltip.onlyInstance = this
     } else {
-      return Tooltip.onlyInstance;
+      return Tooltip.onlyInstance
     }
   }
   initialize () {
