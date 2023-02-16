@@ -66,6 +66,7 @@ describe('forms-fetch-api-part-2/product-form-v1', () => {
     };
 
     const fields = Object.keys(defaultFormData);
+
     const values = {};
 
     for (const field of fields) {
