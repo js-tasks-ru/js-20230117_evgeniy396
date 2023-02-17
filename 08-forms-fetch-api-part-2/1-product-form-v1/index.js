@@ -191,7 +191,7 @@ export default class ProductForm {
   }
 
   takeProduct() {
-    const product = this.productId ? this.defaultFormData : this.product
+    const product = this.productId ? this.product : this.defaultFormData
     const productArr = Object.entries(product)
     const productFormEl = this.subElements.productForm
     const productImageList = this.subElements.imageListContainer
@@ -199,17 +199,17 @@ export default class ProductForm {
       const [field, value] = item
       const formEl = productFormEl.querySelector(`#${field}`)
       if (formEl && field !== 'images') {
-        product[field] = value
-      } else {
-        product[field] = []
+        product[field] = typeof value === 'number' ? parseInt(formEl.value) : formEl.value
+      } else if (field === 'images') {
+        const images = []
         const list = productImageList.querySelector('.sortable-list')
         const items = list.querySelectorAll('li')
         items.forEach( item => {
           const url = item.querySelector('[name="url"]').value
           const source = item.querySelector('[name="source"]').value
-          value.push({ url, source })
+          images.push({ url, source })
         })
-        product[field] = value
+        product[field] = images
       }
     })
     return product
