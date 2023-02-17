@@ -190,8 +190,8 @@ export default class SortableTable {
   }
 
   destroy() {
-    this.remove();
-    this.element = null;
+    this.remove()
+    this.element = null
     this.subElements = {}
     this.controller.abort()
   }

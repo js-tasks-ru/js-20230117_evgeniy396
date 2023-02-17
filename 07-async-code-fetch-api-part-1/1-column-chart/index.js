@@ -82,15 +82,15 @@ export default class ColumnChart {
   }
 
   getSubElements() {
-    const result = {};
-    const elements = this.element.querySelectorAll("[data-element]");
+    const result = {}
+    const elements = this.element.querySelectorAll("[data-element]")
 
     for (const subElement of elements) {
-      const name = subElement.dataset.element;
-      result[name] = subElement;
+      const name = subElement.dataset.element
+      result[name] = subElement
     }
 
-    return result;
+    return result
   }
 
   remove() {
@@ -101,6 +101,3 @@ export default class ColumnChart {
     this.remove()
   }
 }
-
-// https://course-js.javascript.ru/api/dashboard/orders?from=2023-01-11T18%3A43%3A19.402Z&to=2023-01-29T18%3A43%3A19.402Z
-
