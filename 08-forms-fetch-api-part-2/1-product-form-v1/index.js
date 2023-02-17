@@ -173,7 +173,7 @@ export default class ProductForm {
   }
 
   async save() {
-    const product = this.takeProduct()
+    const product = this.saveProduct()
     const url = new URL(this.productsLink, BACKEND_URL)
     try {
       const result = await fetchJson(url, {
@@ -190,7 +190,7 @@ export default class ProductForm {
     }
   }
 
-  takeProduct() {
+  saveProduct() {
     const product = this.productId ? this.product : this.defaultFormData
     const productArr = Object.entries(product)
     const productFormEl = this.subElements.productForm
