@@ -191,27 +191,27 @@ export default class ProductForm {
   }
 
   takeProduct() {
-    const product = {...this.defaultFormData}
-    const fields = Object.entries(product)
-    fields.forEach(item => {
+    const product = this.productId ? this.defaultFormData : this.product
+    const productArr = Object.entries(product)
+    const productFormEl = this.subElements.productForm
+    const productImageList = this.subElements.imageListContainer
+    productArr.forEach(item => {
       const [field, value] = item
-      const elem = this.subElements.productForm.querySelector(`#${field}`)
-      if (elem) {
-        if (field !== 'images') {
-          product[field] = Number.isFinite(value) ? Number(elem.value) : elem.value
-        } else {
-          const items = elem.querySelectorAll('li')
-          items.forEach( item => {
-              const url = item.querySelector('[name="url"]').value
-              const source = item.querySelector('[name="source"]').value
-              value.push({ url, source })
-            }
-          )
-          product[field] = value
-        }
+      const formEl = productFormEl.querySelector(`#${field}`)
+      if (formEl && field !== 'images') {
+        product[field] = value
+      } else {
+        product[field] = []
+        const list = productImageList.querySelector('.sortable-list')
+        const items = list.querySelectorAll('li')
+        items.forEach( item => {
+          const url = item.querySelector('[name="url"]').value
+          const source = item.querySelector('[name="source"]').value
+          value.push({ url, source })
+        })
+        product[field] = value
       }
     })
-    product.id = this.productId;
     return product
   }
 
