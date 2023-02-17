@@ -8,6 +8,7 @@ const BACKEND_URL = 'https://course-js.javascript.ru';
 export default class ProductForm {
   controller = new AbortController()
   element = null
+  newImg = null
   subElements = null
   categories = null
   product = null
@@ -38,8 +39,15 @@ export default class ProductForm {
     if (this.productId) {
       await this.getProducts()
     }
-    this.subElements.productForm.addEventListener('submit', this.onSubmit, {signal: this.controller.signal})
+    this.initEventListener()
     return this.element
+  }
+
+  initEventListener () {
+    const { productForm, uploadImage } = this.subElements
+
+    productForm.addEventListener('submit', this.onSubmit, {signal: this.controller.signal})
+    uploadImage.addEventListener('click', this.uploadImage, {signal: this.controller.signal})
   }
 
   getTemplate (data) {
@@ -62,7 +70,7 @@ export default class ProductForm {
               <ul class="sortable-list">
               </ul>
             </div>
-            <button type="button" name="uploadImage" class="button-primary-outline"><span>Загрузить</span></button>
+            <button data-element="uploadImage" type="button" name="uploadImage" class="button-primary-outline"><span>Загрузить</span></button>
           </div>
           <div class="form-group form-group__half_left">
             <label class="form-label">Категория</label>
@@ -130,27 +138,60 @@ export default class ProductForm {
 
   setProduct (product) {
     const productArr = Object.entries(product)
-    const productFormEl = this.subElements.productForm
-    const productImageList = this.subElements.imageListContainer
+    const { productForm, imageListContainer } = this.subElements
     productArr.forEach(item => {
       const [field, value] = item
-      if (productFormEl.querySelector(`#${field}`) && field !== 'images') {
-        productFormEl.querySelector(`#${field}`).value = value
+      if (productForm.querySelector(`#${field}`) && field !== 'images') {
+        productForm.querySelector(`#${field}`).value = value
       } else if (field === 'images' && value.length !== 0) {
-        productImageList.querySelector('.sortable-list').innerHTML = this.getImages(value)
+        imageListContainer.querySelector('.sortable-list').innerHTML = this.getImages(value)
       }
     })
   }
+  uploadImage = () => {
+    const fileInput = document.createElement('input')
+    fileInput.type = 'file'
+    fileInput.accept = 'image/*'
 
-  images (image) {
+    fileInput.addEventListener('change', async () => {
+      const [file] = fileInput.files
+      if (file) {
+        const formData = new FormData()
+        const { uploadImage, imageListContainer } = this.subElements
+        formData.append('image', file);
+        uploadImage.classList.add('is-loading');
+        uploadImage.disabled = true;
+        const result = await fetchJson('https://api.imgur.com/3/image', {
+          method: 'POST',
+          headers: {
+            Authorization: `Client-ID ${IMGUR_CLIENT_ID}`,
+          },
+          body: formData,
+          referrer: ''
+        })
+        const newImg = document.createElement('div')
+        newImg.innerHTML = this.image(result.data.link, file.name)
+        this.newImg = newImg.firstElementChild
+        imageListContainer.querySelector('.sortable-list').append(this.newImg)
+        uploadImage.classList.remove('is-loading')
+        uploadImage.disabled = false
+
+        fileInput.remove()
+      }
+    })
+    fileInput.hidden = true
+    document.body.append(fileInput)
+    fileInput.click()
+  }
+  image (url, source) {
     return `
       <li class="products-edit__imagelist-item sortable-list__item" style="">
-        <input type="hidden" name="url" value="${image.url}">
-        <input type="hidden" name="source" value="${image.source}">
+        <input type="hidden" name="url" value="${url}">
+        <input type="hidden" name="source" value="${source}">
         <span>
           <img src="icon-grab.svg" data-grab-handle="" alt="grab">
-          <img class="sortable-table__cell-img" alt="Image" src="${image.url}">
-          <span>${image.source}</span>
+          <img class="sortable-table__cell-img" alt="Image" src="${url}">
+          <span>${source}</span>
         </span>
         <button type="button">
           <img src="icon-trash.svg" data-delete-handle="" alt="delete">
@@ -161,7 +202,7 @@ export default class ProductForm {
 
   getImages (images) {
     return images.map(image => {
-      return this.images(image)
+      return this.image(image.url, image.source)
     }).join('')
   }
 
@@ -194,16 +235,15 @@ export default class ProductForm {
   saveProduct() {
     const product = this.productId ? this.product : this.defaultFormData
     const productArr = Object.entries(product)
-    const productFormEl = this.subElements.productForm
-    const productImageList = this.subElements.imageListContainer
+    const { productForm, imageListContainer } = this.subElements
     productArr.forEach(item => {
       const [field, value] = item
-      const formEl = productFormEl.querySelector(`#${field}`)
+      const formEl = productForm.querySelector(`#${field}`)
       if (formEl && field !== 'images') {
         product[field] = typeof value === 'number' ? parseInt(formEl.value) : formEl.value
       } else if (field === 'images') {
         const images = []
-        const list = productImageList.querySelector('.sortable-list')
+        const list = imageListContainer.querySelector('.sortable-list')
         const items = list.querySelectorAll('li')
         items.forEach( item => {
           const url = item.querySelector('[name="url"]').value
@@ -242,8 +282,8 @@ export default class ProductForm {
   }
 
   destroy() {
-    this.remove();
-    this.element = null;
+    this.remove()
+    this.element = null
     this.subElements = {}
     this.controller.abort()
   }
