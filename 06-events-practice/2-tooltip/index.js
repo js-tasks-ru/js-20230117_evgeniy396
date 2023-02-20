@@ -65,4 +65,4 @@ class Tooltip {
 }
 
 
-export default Tooltip;
+export default Tooltip
