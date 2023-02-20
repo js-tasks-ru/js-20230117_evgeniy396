@@ -1,14 +1,14 @@
-import SortableList from '../../2-sortable-list/src/index.js';
-import escapeHtml from './utils/escape-html.js';
-import fetchJson from './utils/fetch-json.js';
+import SortableList from '../2-sortable-list/index.js'
+import escapeHtml from './utils/escape-html.js'
+import fetchJson from './utils/fetch-json.js'
 
-const IMGUR_CLIENT_ID = '28aaa2e823b03b1';
-const BACKEND_URL = 'https://course-js.javascript.ru';
+const IMGUR_CLIENT_ID = '28aaa2e823b03b1'
+const BACKEND_URL = 'https://course-js.javascript.ru'
 
 export default class ProductForm {
   controller = new AbortController()
   element = null
-  newImg = null
+  imageTemplate = null
   subElements = null
   categories = null
   product = null
@@ -67,8 +67,6 @@ export default class ProductForm {
           <div class="form-group form-group__wide" data-element="sortable-list-container">
             <label class="form-label">Фото</label>
             <div data-element="imageListContainer">
-              <ul class="sortable-list">
-              </ul>
             </div>
             <button data-element="uploadImage" type="button" name="uploadImage" class="button-primary-outline"><span>Загрузить</span></button>
           </div>
@@ -138,13 +136,13 @@ export default class ProductForm {
 
   setProduct (product) {
     const productArr = Object.entries(product)
-    const { productForm, imageListContainer } = this.subElements
+    const { productForm } = this.subElements
     productArr.forEach(item => {
       const [field, value] = item
       if (productForm.querySelector(`#${field}`) && field !== 'images') {
         productForm.querySelector(`#${field}`).value = value
       } else if (field === 'images' && value.length !== 0) {
-        imageListContainer.querySelector('.sortable-list').innerHTML = this.getImages(value)
+        this.getImages(product.images)
       }
     })
   }
@@ -158,9 +156,9 @@ export default class ProductForm {
       if (file) {
         const formData = new FormData()
         const { uploadImage, imageListContainer } = this.subElements
-        formData.append('image', file);
-        uploadImage.classList.add('is-loading');
-        uploadImage.disabled = true;
+        formData.append('image', file)
+        uploadImage.classList.add('is-loading')
+        uploadImage.disabled = true
         const result = await fetchJson('https://api.imgur.com/3/image', {
           method: 'POST',
           headers: {
@@ -169,10 +167,8 @@ export default class ProductForm {
           body: formData,
           referrer: ''
         })
-        const newImg = document.createElement('div')
-        newImg.innerHTML = this.image(result.data.link, file.name)
-        this.newImg = newImg.firstElementChild
-        imageListContainer.querySelector('.sortable-list').append(this.newImg)
+        console.log(result.data.link, file.name)
+        imageListContainer.firstElementChild.append(this.imageTeplate(result.data.link, file.name))
         uploadImage.classList.remove('is-loading')
         uploadImage.disabled = false
 
@@ -183,27 +179,32 @@ export default class ProductForm {
     document.body.append(fileInput)
     fileInput.click()
   }
-  image (url, source) {
-    return `
-      <li class="products-edit__imagelist-item sortable-list__item" style="">
-        <input type="hidden" name="url" value="${url}">
-        <input type="hidden" name="source" value="${source}">
+  imageTeplate (url, source) {
+    const wrapper = document.createElement('div')
+
+    wrapper.innerHTML = `
+      <li class="products-edit__imagelist-item sortable-list__item">
         <span>
-          <img src="icon-grab.svg" data-grab-handle="" alt="grab">
-          <img class="sortable-table__cell-img" alt="Image" src="${url}">
-          <span>${source}</span>
+          <img src="icon-grab.svg" data-grab-handle alt="grab">
+          <img class="sortable-table__cell-img" alt="${escapeHtml(source)}" src="${escapeHtml(url)}">
+          <span>${escapeHtml(source)}</span>
         </span>
         <button type="button">
-          <img src="icon-trash.svg" data-delete-handle="" alt="delete">
+          <img src="icon-trash.svg" alt="delete" data-delete-handle>
         </button>
-      </li>\
-    `
+      </li>`
+
+    return wrapper.firstElementChild
   }
 
   getImages (images) {
-    return images.map(image => {
-      return this.image(image.url, image.source)
-    }).join('')
+    console.log(images)
+    const { imageListContainer } = this.subElements
+    const items = images.map(({ url, source }) => this.imageTeplate(url, source))
+    const sortableList = new SortableList({
+      items
+    })
+    imageListContainer.append(sortableList.element)
   }
 
   dispatchEvent(productId) {
@@ -243,13 +244,14 @@ export default class ProductForm {
         product[field] = typeof value === 'number' ? parseInt(formEl.value) : formEl.value
       } else if (field === 'images') {
         const images = []
-        const list = imageListContainer.querySelector('.sortable-list')
-        const items = list.querySelectorAll('li')
-        items.forEach( item => {
-          const url = item.querySelector('[name="url"]').value
-          const source = item.querySelector('[name="source"]').value
-          images.push({ url, source })
-        })
+
+        const imagesHTMLCollection = imageListContainer.querySelectorAll('.sortable-table__cell-img')
+        for (const image of imagesHTMLCollection) {
+          images.push({
+            url: image.src,
+            source: image.alt
+          })
+        }
         product[field] = images
       }
     })
@@ -288,4 +290,3 @@ export default class ProductForm {
     this.controller.abort()
   }
 }
-
